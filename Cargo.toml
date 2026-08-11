@@ -1,0 +1,15 @@
+[package]
+name = "jiff-chrono"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+default = ["chrono04", "jiff02"]
+chrono04 = ["dep:chrono_04", "dep:chrono_tz_04"]
+jiff02 = ["dep:jiff_02"]
+
+[dependencies]
+chrono_04 = { package = "chrono", version = "0.4", optional = true, default-features = false, features = ["std"] }
+chrono_tz_04  = { package = "chrono-tz", version = "0.10.4", optional = true, default-features = false }
+jiff_02 = { package = "jiff", version = "0.2", optional = true }
+thiserror = "2.0.20"
