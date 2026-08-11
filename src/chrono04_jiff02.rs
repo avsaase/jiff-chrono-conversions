@@ -68,7 +68,7 @@ impl ToJiff<jiff::civil::Time> for chrono::NaiveTime {
             self.hour() as i8,
             self.minute() as i8,
             self.second() as i8,
-            self.nanosecond().clamp(0, 999_999_999) as i32,
+            self.nanosecond().min(999_999_999) as i32,
         )
         .expect("Conversion never fails")
     }
@@ -124,12 +124,17 @@ impl ToChrono<chrono::NaiveDateTime> for jiff::civil::DateTime {
 /// Convert a `chrono::DateTime<chrono::Utc>` to a `jiff::Timestamp`.
 ///
 /// This conversion is fallible because `chrono`'s `DateTime` range is larger than `jiff`'s
-/// `Timestamp` range.
+/// `Timestamp` range. It is infallible with respect to leap seconds: like `jiff::civil::Time`,
+/// `jiff::Timestamp` does not support leap seconds, so if the `chrono::DateTime` is a leap
+/// second, it is converted to the last nanosecond of the second before it.
 impl TryToJiff<jiff::Timestamp> for chrono::DateTime<chrono::Utc> {
     type Error = jiff::Error;
 
     fn to_jiff(&self) -> Result<jiff::Timestamp, Self::Error> {
-        jiff::Timestamp::new(self.timestamp(), self.timestamp_subsec_nanos() as i32)
+        jiff::Timestamp::new(
+            self.timestamp(),
+            self.timestamp_subsec_nanos().min(999_999_999) as i32,
+        )
     }
 }
 
@@ -139,8 +144,17 @@ impl TryToJiff<jiff::Timestamp> for chrono::DateTime<chrono::Utc> {
 /// `DateTime` range.
 impl ToChrono<chrono::DateTime<chrono::Utc>> for jiff::Timestamp {
     fn to_chrono(&self) -> chrono::DateTime<chrono::Utc> {
-        chrono::DateTime::from_timestamp(self.as_second(), self.subsec_nanosecond() as u32)
-            .expect("Conversion never fails")
+        // `jiff`'s `second` and `subsec_nanosecond` share the same sign (both negative for
+        // timestamps before the Unix epoch), whereas `chrono::DateTime::from_timestamp` expects
+        // a non-negative nanosecond count. Borrow a second to make the nanoseconds non-negative
+        // when needed.
+        let mut secs = self.as_second();
+        let mut nanos = self.subsec_nanosecond();
+        if nanos < 0 {
+            secs -= 1;
+            nanos += 1_000_000_000;
+        }
+        chrono::DateTime::from_timestamp(secs, nanos as u32).expect("Conversion never fails")
     }
 }
 

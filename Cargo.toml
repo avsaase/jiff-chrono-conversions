@@ -15,7 +15,25 @@ chrono_tz_04 = { package = "chrono-tz", version = "0.10.4", default-features = f
 jiff_02 = { package = "jiff", version = "0.2", optional = true }
 thiserror = "2.0.20"
 
+[dev-dependencies]
+proptest = "1.5"
+arbitrary = "1.4"
+proptest-arbitrary-interop = "0.1"
+# Re-declared here (in addition to `[dependencies]`) to turn on each crate's `arbitrary` feature
+# for tests only.
+chrono_04 = { package = "chrono", version = "0.4", default-features = false, features = [
+  "std",
+  "arbitrary",
+] }
+# `jiff`'s `arbitrary` feature isn't in a released version yet, so tests pull in the crate from
+# git via the `[patch]` below.
+jiff_02 = { package = "jiff", version = "0.2", features = ["arbitrary"] }
+
 [features]
 default = ["chrono04", "jiff02"]
 chrono04 = ["dep:chrono_04", "dep:chrono_tz_04"]
 jiff02 = ["dep:jiff_02"]
+
+# Pulls in `jiff` from git so tests can use its not-yet-released `arbitrary` feature.
+[patch.crates-io]
+jiff = { git = "https://github.com/BurntSushi/jiff" }
