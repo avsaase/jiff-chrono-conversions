@@ -82,8 +82,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "jiff-chrono"
-version = "0.1.0"
+name = "jiff-chrono-conversions"
+version = "0.0.1"
 dependencies = [
  "chrono",
  "chrono-tz",
