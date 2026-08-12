@@ -178,13 +178,23 @@ dependencies = [
 name = "jiff-chrono-conversions"
 version = "0.0.1"
 dependencies = [
+ "chrono",
+ "chrono-tz",
+ "jiff",
+ "thiserror",
+]
+
+[[package]]
+name = "jiff-chrono-conversions-testsuite"
+version = "0.0.0"
+dependencies = [
  "arbitrary",
  "chrono",
  "chrono-tz",
  "jiff",
+ "jiff-chrono-conversions",
  "proptest",
  "proptest-arbitrary-interop",
- "thiserror",
 ]
 
 [[package]]

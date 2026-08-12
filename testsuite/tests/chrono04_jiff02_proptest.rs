@@ -1,5 +1,3 @@
-#![cfg(all(feature = "chrono04", feature = "jiff02"))]
-
 use chrono_04 as chrono;
 use chrono_tz_04 as chrono_tz;
 use jiff_02 as jiff;
@@ -8,14 +6,6 @@ use proptest::prelude::*;
 use proptest_arbitrary_interop::arb;
 
 use chrono::{Datelike, Timelike};
-
-/* Strategies */
-//
-// `chrono` and `jiff` both implement `arbitrary::Arbitrary` for their types (gated behind an
-// `arbitrary` feature), generating values across each type's *own* full valid range. We use
-// `proptest_arbitrary_interop::arb` to turn those `Arbitrary` impls into proptest strategies, and
-// then filter down to the overlapping range where needed, rather than hand-constructing values
-// ourselves.
 
 fn jiff_year_range() -> std::ops::RangeInclusive<i32> {
     (jiff::civil::Date::MIN.year() as i32)..=(jiff::civil::Date::MAX.year() as i32)
@@ -47,8 +37,8 @@ fn chrono_utc_datetime_in_jiff_range() -> impl Strategy<Value = chrono::DateTime
     )
 }
 
-fn chrono_utc_datetime_leap_second_in_jiff_range(
-) -> impl Strategy<Value = chrono::DateTime<chrono::Utc>> {
+fn chrono_utc_datetime_leap_second_in_jiff_range()
+-> impl Strategy<Value = chrono::DateTime<chrono::Utc>> {
     // Leap seconds are a vanishingly small fraction of what `arb::<chrono::NaiveTime>()`
     // generates, so rather than filtering `arb::<chrono::DateTime<chrono::Utc>>()` down to them
     // (which the proptest rejection sampler can't do fast enough), build one directly: an

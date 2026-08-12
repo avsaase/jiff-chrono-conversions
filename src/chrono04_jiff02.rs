@@ -146,8 +146,7 @@ impl ToChrono<chrono::DateTime<chrono::Utc>> for jiff::Timestamp {
     fn to_chrono(&self) -> chrono::DateTime<chrono::Utc> {
         // `jiff`'s `second` and `subsec_nanosecond` share the same sign (both negative for
         // timestamps before the Unix epoch), whereas `chrono::DateTime::from_timestamp` expects
-        // a non-negative nanosecond count. Borrow a second to make the nanoseconds non-negative
-        // when needed.
+        // a non-negative nanosecond count.
         let mut secs = self.as_second();
         let mut nanos = self.subsec_nanosecond();
         if nanos < 0 {
