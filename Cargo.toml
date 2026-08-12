@@ -2,8 +2,9 @@
 name = "jiff-chrono-conversions"
 version = "0.0.1"
 edition = "2024"
-documentation = "httpsL//docs.rs/jiff-chrono-conversions"
+documentation = "https://docs.rs/jiff-chrono-conversions"
 repository = "https://github.com/avsaase/jiff-chrono-conversions"
+license = "MIT"
 keywords = ["chrono", "conversion", "jiff"]
 categories = ["date-and-time"]
 
@@ -24,7 +25,7 @@ jiff02 = ["dep:jiff_02"]
 # rather than in this crate's `[dev-dependencies]`, because it needs `jiff`'s `arbitrary` feature,
 # which isn't in a released version yet and would otherwise make this crate unpublishable.
 [workspace]
-members = ["testsuite"]
+members = ["testsuite", "examples/basic"]
 
 # Keeps `jiff` as the same package across both workspace members (rather than two separate copies
 # from two different sources), so the testsuite crate's `jiff` types are the same types this

@@ -185,6 +185,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "jiff-chrono-conversions-example-basic"
+version = "0.0.0"
+dependencies = [
+ "chrono",
+ "chrono-tz",
+ "jiff",
+ "jiff-chrono-conversions",
+]
+
+[[package]]
 name = "jiff-chrono-conversions-testsuite"
 version = "0.0.0"
 dependencies = [
