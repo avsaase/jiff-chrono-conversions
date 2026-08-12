@@ -1,17 +1,19 @@
 //! Conversions between [`chrono`] and [`jiff`] types.
 //!
-//! `chrono` is in the process of being soft-deprecated in favor of `jiff`. For small codebases,
-//! it usually makes sense to migrate all at once. For larger codebases, a full migration may not
-//! be feasible in one go, and it can make more sense to migrate incrementally, converting between
-//! `chrono` and `jiff` types at the boundaries as you go. Even once your own code is fully on
-//! `jiff`, some dependencies may still expose `chrono` types in their public APIs, so conversions
-//! are still needed at those boundaries. This crate provides those conversions, exposed as the
+//! `chrono` is in the process of being soft-deprecated in favor of `jiff`. For small codebases, it
+//! usually makes sense to migrate all at once. For larger codebases, a full migration may not be
+//! feasible in one go, and it can make more sense to migrate incrementally, converting between
+//! `chrono` and `jiff` types at the boundaries. Even once your own code is fully on `jiff`, some
+//! dependencies may still expose `chrono` types in their public APIs, so conversions are still
+//! needed at those boundaries. This crate provides those conversions, exposed as the
 //! [`ToJiff`]/[`TryToJiff`] traits for infallible conversions and [`ToChrono`]/[`TryToChrono`]
 //! traits for fallible conversions.
 //!
-//! This is a small crate, and the conversions it provides are not complicated. But whether a given
-//! conversion is fallible or infallible isn't always obvious from the two APIs alone, so it can
-//! still be worth using this crate rather than hand-rolling the conversions yourself.
+//! This is a small crate, and the conversions it provides are not complicated. But whether a
+//! given conversion is fallible or infallible isn't always obvious from the two APIs alone, so it
+//! can still be worth using this crate rather than hand-rolling the conversions yourself. Each
+//! conversion is checked with property-based tests, making sure the conversions are correct:
+//! round-tripping within the range two types have in common and correctly erroring outside of it.
 //!
 //! # Supported versions
 //!
@@ -27,6 +29,11 @@
 //! between those versions. Currently the `chrono04` and `jiff02` features are enabled by default.
 //!
 //! Once `jiff` reaches `1.0` support for this version can be added to this crate.
+//!
+//! # Limitations
+//!
+//! Currently only `std` is supported. If you need `no_std` support, please
+//! [open an issue](https://github.com/avsaase/jiff-chrono-conversions/issues).
 //!
 //! [`chrono`]: https://docs.rs/chrono
 //! [`jiff`]: https://docs.rs/jiff
