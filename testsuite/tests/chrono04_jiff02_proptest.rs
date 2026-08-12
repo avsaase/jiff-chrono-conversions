@@ -115,6 +115,22 @@ proptest! {
     }
 
     #[test]
+    fn date_chrono_to_jiff_matches_components(date in chrono_date_in_jiff_range()) {
+        let jiff_date = date.to_jiff().expect("date is within jiff's range");
+        prop_assert_eq!(jiff_date.year() as i32, date.year());
+        prop_assert_eq!(jiff_date.month() as u32, date.month());
+        prop_assert_eq!(jiff_date.day() as u32, date.day());
+    }
+
+    #[test]
+    fn date_jiff_to_chrono_matches_components(date in arb::<jiff::civil::Date>()) {
+        let chrono_date = date.to_chrono();
+        prop_assert_eq!(chrono_date.year(), date.year() as i32);
+        prop_assert_eq!(chrono_date.month(), date.month() as u32);
+        prop_assert_eq!(chrono_date.day(), date.day() as u32);
+    }
+
+    #[test]
     fn date_outside_jiff_range_fails_to_convert(date in chrono_date_outside_jiff_range()) {
         prop_assert!(date.to_jiff().is_err());
     }
@@ -133,6 +149,26 @@ proptest! {
     #[test]
     fn time_roundtrip_jiff_to_chrono_to_jiff(time in arb::<jiff::civil::Time>()) {
         prop_assert_eq!(time.to_chrono().to_jiff(), time);
+    }
+
+    #[test]
+    fn time_chrono_to_jiff_matches_components(
+        time in arb::<chrono::NaiveTime>().prop_filter("not a leap second", |t| t.nanosecond() < 1_000_000_000)
+    ) {
+        let jiff_time = time.to_jiff();
+        prop_assert_eq!(jiff_time.hour() as u32, time.hour());
+        prop_assert_eq!(jiff_time.minute() as u32, time.minute());
+        prop_assert_eq!(jiff_time.second() as u32, time.second());
+        prop_assert_eq!(jiff_time.subsec_nanosecond() as u32, time.nanosecond());
+    }
+
+    #[test]
+    fn time_jiff_to_chrono_matches_components(time in arb::<jiff::civil::Time>()) {
+        let chrono_time = time.to_chrono();
+        prop_assert_eq!(chrono_time.hour() as i8, time.hour());
+        prop_assert_eq!(chrono_time.minute() as i8, time.minute());
+        prop_assert_eq!(chrono_time.second() as i8, time.second());
+        prop_assert_eq!(chrono_time.nanosecond() as i32, time.subsec_nanosecond());
     }
 
     #[test]
@@ -177,6 +213,37 @@ proptest! {
         let datetime = chrono::NaiveDateTime::new(date, time);
         prop_assert!(datetime.to_jiff().is_err());
     }
+
+    #[test]
+    fn datetime_chrono_to_jiff_matches_components(
+        date in chrono_date_in_jiff_range(),
+        time in arb::<chrono::NaiveTime>().prop_filter("not a leap second", |t| t.nanosecond() < 1_000_000_000),
+    ) {
+        let datetime = chrono::NaiveDateTime::new(date, time);
+        let jiff_datetime = datetime.to_jiff().expect("datetime is within jiff's range");
+        prop_assert_eq!(jiff_datetime.date().year() as i32, date.year());
+        prop_assert_eq!(jiff_datetime.date().month() as u32, date.month());
+        prop_assert_eq!(jiff_datetime.date().day() as u32, date.day());
+        prop_assert_eq!(jiff_datetime.time().hour() as u32, time.hour());
+        prop_assert_eq!(jiff_datetime.time().minute() as u32, time.minute());
+        prop_assert_eq!(jiff_datetime.time().second() as u32, time.second());
+        prop_assert_eq!(jiff_datetime.time().subsec_nanosecond() as u32, time.nanosecond());
+    }
+
+    #[test]
+    fn datetime_jiff_to_chrono_matches_components(datetime in arb::<jiff::civil::DateTime>()) {
+        let chrono_datetime = datetime.to_chrono();
+        prop_assert_eq!(chrono_datetime.date().year(), datetime.date().year() as i32);
+        prop_assert_eq!(chrono_datetime.date().month(), datetime.date().month() as u32);
+        prop_assert_eq!(chrono_datetime.date().day(), datetime.date().day() as u32);
+        prop_assert_eq!(chrono_datetime.time().hour() as i8, datetime.time().hour());
+        prop_assert_eq!(chrono_datetime.time().minute() as i8, datetime.time().minute());
+        prop_assert_eq!(chrono_datetime.time().second() as i8, datetime.time().second());
+        prop_assert_eq!(
+            chrono_datetime.time().nanosecond() as i32,
+            datetime.time().subsec_nanosecond()
+        );
+    }
 }
 
 /* Timestamp */
@@ -214,6 +281,30 @@ proptest! {
         let expected = chrono_dt.timestamp() as i128 * 1_000_000_000 + 999_999_999;
         prop_assert_eq!(actual, expected);
     }
+
+    // Compare the total nanosecond instant rather than the individual `second`/`nanosecond`
+    // fields directly: `jiff::Timestamp` ties their signs together (see the leap-second test
+    // above), so for pre-epoch instants the two libraries don't necessarily split the same
+    // instant across the fields the same way, even though they represent the same instant.
+    #[test]
+    fn timestamp_chrono_to_jiff_matches_components(chrono_dt in chrono_utc_datetime_in_jiff_range()) {
+        let jiff_ts = chrono_dt.to_jiff().expect("timestamp is within jiff's range");
+        let actual =
+            jiff_ts.as_second() as i128 * 1_000_000_000 + jiff_ts.subsec_nanosecond() as i128;
+        let expected =
+            chrono_dt.timestamp() as i128 * 1_000_000_000 + chrono_dt.timestamp_subsec_nanos() as i128;
+        prop_assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn timestamp_jiff_to_chrono_matches_components(jiff_ts in arb::<jiff::Timestamp>()) {
+        let chrono_dt = jiff_ts.to_chrono();
+        let actual =
+            chrono_dt.timestamp() as i128 * 1_000_000_000 + chrono_dt.timestamp_subsec_nanos() as i128;
+        let expected =
+            jiff_ts.as_second() as i128 * 1_000_000_000 + jiff_ts.subsec_nanosecond() as i128;
+        prop_assert_eq!(actual, expected);
+    }
 }
 
 /* Offset */
@@ -237,6 +328,18 @@ proptest! {
     #[test]
     fn offset_outside_chrono_range_fails_to_convert(jiff_offset in jiff_offset_outside_chrono_range()) {
         prop_assert!(jiff_offset.to_chrono().is_err());
+    }
+
+    #[test]
+    fn offset_chrono_to_jiff_matches_components(chrono_offset in arb::<chrono::FixedOffset>()) {
+        let jiff_offset = chrono_offset.to_jiff();
+        prop_assert_eq!(jiff_offset.seconds(), chrono_offset.local_minus_utc());
+    }
+
+    #[test]
+    fn offset_jiff_to_chrono_matches_components(jiff_offset in jiff_offset_in_chrono_range()) {
+        let chrono_offset = jiff_offset.to_chrono().expect("offset is within chrono's range");
+        prop_assert_eq!(chrono_offset.local_minus_utc(), jiff_offset.seconds());
     }
 }
 
@@ -271,6 +374,32 @@ proptest! {
     ) {
         let zoned = timestamp.to_zoned(jiff::tz::TimeZone::fixed(offset));
         prop_assert!(zoned.to_chrono().is_err());
+    }
+
+    #[test]
+    fn zoned_chrono_to_jiff_matches_components(chrono_dt in chrono_fixedoffset_datetime_in_jiff_range()) {
+        let zoned = chrono_dt.to_jiff().expect("value is within jiff's range");
+        let utc = chrono_dt.with_timezone(&chrono::Utc);
+        let actual = zoned.timestamp().as_second() as i128 * 1_000_000_000
+            + zoned.timestamp().subsec_nanosecond() as i128;
+        let expected = utc.timestamp() as i128 * 1_000_000_000 + utc.timestamp_subsec_nanos() as i128;
+        prop_assert_eq!(actual, expected);
+        prop_assert_eq!(zoned.offset().seconds(), chrono_dt.offset().local_minus_utc());
+    }
+
+    #[test]
+    fn zoned_jiff_to_chrono_matches_components(
+        timestamp in arb::<jiff::Timestamp>(),
+        offset in jiff_offset_in_chrono_range(),
+    ) {
+        let zoned = timestamp.to_zoned(jiff::tz::TimeZone::fixed(offset));
+        let chrono_dt = zoned.to_chrono().expect("offset is within chrono's range");
+        let utc = chrono_dt.with_timezone(&chrono::Utc);
+        let actual = utc.timestamp() as i128 * 1_000_000_000 + utc.timestamp_subsec_nanos() as i128;
+        let expected =
+            timestamp.as_second() as i128 * 1_000_000_000 + timestamp.subsec_nanosecond() as i128;
+        prop_assert_eq!(actual, expected);
+        prop_assert_eq!(chrono_dt.offset().local_minus_utc(), offset.seconds());
     }
 }
 
