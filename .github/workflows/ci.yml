@@ -18,6 +18,10 @@ jobs:
       - name: Check formatting
         run: cargo fmt --all -- --check
 
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-reedme
+
       - name: Check
         run: cargo check --workspace --all-features
 
