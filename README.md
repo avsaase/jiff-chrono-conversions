@@ -45,7 +45,7 @@ let jiff_date = jiff::civil::date(2024, 3, 15);
 let chrono_date = jiff_date.to_chrono();
 assert_eq!(chrono_date, chrono::NaiveDate::from_ymd_opt(2024, 3, 15).unwrap());
 
-let jiff_date: jiff::civil::Date = chrono_date.to_jiff().unwrap();
+let jiff_date: jiff::civil::Date = chrono_date.try_to_jiff().unwrap();
 assert_eq!(jiff_date, jiff::civil::date(2024, 3, 15));
 ```
 
@@ -66,6 +66,15 @@ between those versions. Currently only the `chrono04` and `jiff02` features are 
 they are enabled by default.
 
 Once `jiff` reaches `1.0` support for this version can be added to this crate.
+
+## Error handling
+
+To keep the error handling as simple as possible, all fallible conversions in this crate return
+the same [`Error`](https://docs.rs/jiff-chrono-conversions/latest/jiff_chrono_conversions/struct.Error.html) type. This is because `chrono` does not consistently use `Result` for its
+fallible operations and not all possible errors in the conversions compose cleanly. If a
+conversion failed because of an underlying `chrono` or `jiff` error you can inspect the
+underlying cause via [`std::error::Error::source`](https://docs.rs/jiff-chrono-conversions/latest/jiff-chrono-conversions/https://doc.rust-lang.org/1.97.1/core/error/trait.Error.html#method.source). Otherwise, the error message will describe
+the failure reason in a human-readable way.
 
 ## Limitations
 

@@ -48,6 +48,15 @@
 //!
 //! Once `jiff` reaches `1.0` support for this version can be added to this crate.
 //!
+//! # Error handling
+//!
+//! To keep the error handling as simple as possible, all fallible conversions in this crate return
+//! the same [`Error`] type. This is because `chrono` does not consistently use `Result` for its
+//! fallible operations and not all possible errors in the conversions compose cleanly. If a
+//! conversion failed because of an underlying `chrono` or `jiff` error you can inspect the
+//! underlying cause via [`std::error::Error::source`]. Otherwise, the error message will describe
+//! the failure reason in a human-readable way.
+//!
 //! # Limitations
 //!
 //! Currently only `std` is supported. If you need `no_std` support, please
