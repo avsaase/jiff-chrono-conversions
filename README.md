@@ -73,7 +73,7 @@ To keep the error handling as simple as possible, all fallible conversions in th
 the same [`Error`](https://docs.rs/jiff-chrono-conversions/latest/jiff_chrono_conversions/struct.Error.html) type. This is because `chrono` does not consistently use `Result` for its
 fallible operations and not all possible errors in the conversions compose cleanly. If a
 conversion failed because of an underlying `chrono` or `jiff` error you can inspect the
-underlying cause via [`std::error::Error::source`](https://docs.rs/jiff-chrono-conversions/latest/jiff-chrono-conversions/https://doc.rust-lang.org/1.97.1/core/error/trait.Error.html#method.source). Otherwise, the error message will describe
+underlying cause via [`std::error::Error::source`](https://doc.rust-lang.org/stable/core/error/Error/fn.source.html). Otherwise, the error message will describe
 the failure reason in a human-readable way.
 
 ## Limitations
