@@ -17,7 +17,11 @@ impl TryToJiff<jiff::civil::Date> for chrono::NaiveDate {
         // The casts here are safe because
         // - `chrono`'s month is a u32 in the range [1, 12], which fits in an i8.
         // - `chrono`'s day is a u32 in the range [1, 31], which fits in an i8.
-        Ok(jiff::civil::Date::new(year, self.month() as i8, self.day() as i8)?)
+        Ok(jiff::civil::Date::new(
+            year,
+            self.month() as i8,
+            self.day() as i8,
+        )?)
     }
 }
 

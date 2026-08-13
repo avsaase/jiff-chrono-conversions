@@ -47,7 +47,13 @@ fn main() {
     // Time zone: both directions are fallible.
     let chrono_tz = chrono_tz::Tz::Europe__Amsterdam;
     let jiff_tz: jiff::tz::TimeZone = chrono_tz.try_to_jiff().unwrap();
-    println!("time zone: chrono {chrono_tz} -> jiff {}", jiff_tz.iana_name().unwrap());
+    println!(
+        "time zone: chrono {chrono_tz} -> jiff {}",
+        jiff_tz.iana_name().unwrap()
+    );
     let chrono_tz: chrono_tz::Tz = jiff_tz.try_to_chrono().unwrap();
-    println!("time zone: jiff {} -> chrono {chrono_tz}", jiff_tz.iana_name().unwrap());
+    println!(
+        "time zone: jiff {} -> chrono {chrono_tz}",
+        jiff_tz.iana_name().unwrap()
+    );
 }
