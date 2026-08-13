@@ -2,11 +2,18 @@
 name = "jiff-chrono-conversions"
 version = "0.0.1"
 edition = "2024"
+description = "Conversions between jiff and chrono types"
 documentation = "https://docs.rs/jiff-chrono-conversions"
 repository = "https://github.com/avsaase/jiff-chrono-conversions"
 license = "MIT"
 keywords = ["chrono", "conversion", "jiff"]
 categories = ["date-and-time"]
+
+# The property-based test suite lives in its own unpublished workspace member (`testsuite/`)
+# rather than in this crate's `[dev-dependencies]`, because it needs `jiff`'s `arbitrary` feature,
+# which isn't in a released version yet and would otherwise make this crate unpublishable.
+[workspace]
+members = ["examples/basic", "testsuite"]
 
 [dependencies]
 chrono_04 = { package = "chrono", version = "0.4", default-features = false, features = [
@@ -22,12 +29,6 @@ thiserror = "2.0.20"
 default = ["chrono04", "jiff02"]
 chrono04 = ["dep:chrono_04", "dep:chrono_tz_04"]
 jiff02 = ["dep:jiff_02"]
-
-# The property-based test suite lives in its own unpublished workspace member (`testsuite/`)
-# rather than in this crate's `[dev-dependencies]`, because it needs `jiff`'s `arbitrary` feature,
-# which isn't in a released version yet and would otherwise make this crate unpublishable.
-[workspace]
-members = ["testsuite", "examples/basic"]
 
 # Keeps `jiff` as the same package across both workspace members (rather than two separate copies
 # from two different sources), so the testsuite crate's `jiff` types are the same types this

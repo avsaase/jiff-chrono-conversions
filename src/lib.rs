@@ -30,7 +30,7 @@
 //! assert_eq!(jiff_date, jiff::civil::date(2024, 3, 15));
 //! ```
 //!
-//! See the examples folder in the repository for more examples of avialble conversions.
+//! See the examples folder in the repository for more examples of available conversions.
 //!
 //! # Supported versions
 //!

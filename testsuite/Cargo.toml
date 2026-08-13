@@ -8,15 +8,15 @@ publish = false
 jiff-chrono-conversions = { path = "..", features = ["chrono04", "jiff02"] }
 
 [dev-dependencies]
-proptest = "1.5"
 arbitrary = "1.4"
-proptest-arbitrary-interop = "0.1"
 chrono_04 = { package = "chrono", version = "0.4", default-features = false, features = [
-  "std",
   "arbitrary",
+  "std",
 ] }
 chrono_tz_04 = { package = "chrono-tz", version = "0.10.4", default-features = false }
 # `jiff`'s `arbitrary` feature isn't in a released version yet, so pull it from git
 jiff_02 = { package = "jiff", git = "https://github.com/BurntSushi/jiff", features = [
   "arbitrary",
 ] }
+proptest = "1.5"
+proptest-arbitrary-interop = "0.1"

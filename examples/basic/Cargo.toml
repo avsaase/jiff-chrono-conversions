@@ -5,7 +5,7 @@ edition = "2024"
 publish = false
 
 [dependencies]
-jiff-chrono-conversions = { path = "../..", features = ["chrono04", "jiff02"] }
 chrono = { version = "0.4", default-features = false, features = ["std"] }
 chrono-tz = { version = "0.10.4", default-features = false }
 jiff = "0.2"
+jiff-chrono-conversions = { path = "../..", features = ["chrono04", "jiff02"] }
