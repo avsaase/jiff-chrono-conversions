@@ -19,16 +19,17 @@ members = ["examples/basic", "testsuite"]
 chrono_04 = { package = "chrono", version = "0.4", default-features = false, features = [
   "std"
 ], optional = true }
-chrono_tz_04 = { package = "chrono-tz", version = "0.10.4", default-features = false, features = [
+chrono_tz_010 = { package = "chrono-tz", version = "0.10.4", default-features = false, features = [
   "std",
 ], optional = true }
 jiff_02 = { package = "jiff", version = "0.2", optional = true }
 thiserror = "2.0.20"
 
 [features]
-default = ["chrono04", "jiff02"]
-chrono04 = ["dep:chrono_04", "dep:chrono_tz_04"]
-jiff02 = ["dep:jiff_02"]
+default = ["chrono-04", "jiff-02"]
+chrono-04 = ["dep:chrono_04"]
+chrono-tz-010 = ["dep:chrono_tz_010"]
+jiff-02 = ["dep:jiff_02"]
 
 # Keeps `jiff` as the same package across both workspace members (rather than two separate copies
 # from two different sources), so the testsuite crate's `jiff` types are the same types this

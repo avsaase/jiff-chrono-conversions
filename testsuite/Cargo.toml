@@ -5,7 +5,7 @@ edition = "2024"
 publish = false
 
 [dependencies]
-jiff-chrono-conversions = { path = "..", features = ["chrono04", "jiff02"] }
+jiff-chrono-conversions = { path = "..", features = ["chrono-04", "chrono-tz-010", "jiff-02"] }
 
 [dev-dependencies]
 arbitrary = "1.4"
@@ -13,7 +13,7 @@ chrono_04 = { package = "chrono", version = "0.4", default-features = false, fea
   "arbitrary",
   "std",
 ] }
-chrono_tz_04 = { package = "chrono-tz", version = "0.10.4", default-features = false }
+chrono_tz_010 = { package = "chrono-tz", version = "0.10.4", default-features = false }
 # `jiff`'s `arbitrary` feature isn't in a released version yet, so pull it from git
 jiff_02 = { package = "jiff", git = "https://github.com/BurntSushi/jiff", features = [
   "arbitrary",

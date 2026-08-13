@@ -1,14 +1,18 @@
 use chrono_04 as chrono;
-use chrono_tz_04 as chrono_tz;
+#[cfg(feature = "chrono-tz-010")]
+use chrono_tz_010 as chrono_tz;
 use jiff_02 as jiff;
 
-use crate::{Error, ToJiff, TryToChrono, TryToJiff};
+#[cfg(feature = "chrono-tz-010")]
+use crate::TryToJiff;
+use crate::{Error, ToJiff, TryToChrono};
 
 /// Convert a `jiff::tz::TimeZone` to a `chrono_tz::Tz`.
 ///
 /// This conversion is fallible because `jiff` also supports time zones without an IANA name
 /// (e.g. fixed-offset and POSIX time zones), and because `chrono-tz`'s database of IANA names
 /// may not exactly match `jiff`'s.
+#[cfg(feature = "chrono-tz-010")]
 impl TryToChrono<chrono_tz::Tz> for jiff::tz::TimeZone {
     fn try_to_chrono(&self) -> Result<chrono_tz::Tz, Error> {
         let name = self
@@ -22,6 +26,7 @@ impl TryToChrono<chrono_tz::Tz> for jiff::tz::TimeZone {
 ///
 /// This conversion is fallible because `jiff`'s time zone database may not exactly match
 /// `chrono-tz`'s.
+#[cfg(feature = "chrono-tz-010")]
 impl TryToJiff<jiff::tz::TimeZone> for chrono_tz::Tz {
     fn try_to_jiff(&self) -> Result<jiff::tz::TimeZone, Error> {
         Ok(jiff::tz::TimeZone::get(self.name())?)

@@ -1,5 +1,5 @@
 use chrono_04 as chrono;
-use chrono_tz_04 as chrono_tz;
+use chrono_tz_010 as chrono_tz;
 use jiff_02 as jiff;
 use jiff_chrono_conversions::{ToChrono, ToJiff, TryToChrono, TryToJiff};
 use proptest::prelude::*;

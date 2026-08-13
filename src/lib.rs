@@ -37,14 +37,15 @@
 //! Support for each major version of `chrono` and `jiff` is gated behind its own Cargo feature.
 //! Currently these are the supported versions:
 //!
-//! | Feature    | Crate     | Version |
-//! |------------|-----------|---------|
-//! | `chrono04` | `chrono`  | `0.4`   |
-//! | `jiff02`   | `jiff`    | `0.2`   |
+//! | Feature         | Crate       | Version  |
+//! |-----------------|-------------|----------|
+//! | `chrono-04`     | `chrono`    | `0.4`    |
+//! | `chrono-tz-010` | `chrono-tz` | `0.10.4` |
+//! | `jiff-02`       | `jiff`      | `0.2`    |
 //!
 //! Enabling the features for a given version of `chrono` and `jiff` will enable the conversions
-//! between those versions. Currently only the `chrono04` and `jiff02` features are available and
-//! they are enabled by default.
+//! between those versions. Currently only the `chrono-04` and `jiff-02` features are enabled by
+//! default; `chrono-tz-010` adds conversions for `chrono_tz::Tz` and must be enabled separately.
 //!
 //! Once `jiff` reaches `1.0` support for this version can be added to this crate.
 //!
@@ -69,7 +70,7 @@
 //! [`jiff`]: https://docs.rs/jiff
 //! [soft-deprecated]: https://github.com/chronotope/chrono/issues/1768
 
-#[cfg(all(feature = "chrono04", feature = "jiff02"))]
+#[cfg(all(feature = "chrono-04", feature = "jiff-02"))]
 pub mod chrono04_jiff02;
 
 /// The error type returned by the fallible conversions in this crate.

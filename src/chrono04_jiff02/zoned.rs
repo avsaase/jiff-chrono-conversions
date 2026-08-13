@@ -1,5 +1,6 @@
 use chrono_04::{self as chrono};
-use chrono_tz_04 as chrono_tz;
+#[cfg(feature = "chrono-tz-010")]
+use chrono_tz_010 as chrono_tz;
 use jiff_02 as jiff;
 
 use crate::{Error, ToChrono, ToJiff, TryToChrono, TryToJiff};
@@ -54,6 +55,7 @@ impl ToChrono<chrono::DateTime<chrono::Utc>> for jiff::Zoned {
 /// This conversion is fallible because the underlying conversions from
 /// `chrono::DateTime<chrono::Utc>` to `jiff::Timestamp` and from `chrono_tz::Tz` to
 /// `jiff::tz::TimeZone` are both fallible.
+#[cfg(feature = "chrono-tz-010")]
 impl TryToJiff<jiff::Zoned> for chrono::DateTime<chrono_tz::Tz> {
     fn try_to_jiff(&self) -> Result<jiff::Zoned, Error> {
         let timestamp: jiff::Timestamp = self.with_timezone(&chrono::Utc).try_to_jiff()?;
@@ -66,6 +68,7 @@ impl TryToJiff<jiff::Zoned> for chrono::DateTime<chrono_tz::Tz> {
 ///
 /// This conversion is fallible because the underlying conversion from `jiff::tz::TimeZone` to
 /// `chrono_tz::Tz` is fallible.
+#[cfg(feature = "chrono-tz-010")]
 impl TryToChrono<chrono::DateTime<chrono_tz::Tz>> for jiff::Zoned {
     fn try_to_chrono(&self) -> Result<chrono::DateTime<chrono_tz::Tz>, Error> {
         let utc = self.timestamp().to_chrono();
