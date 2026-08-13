@@ -71,6 +71,7 @@
 //! [soft-deprecated]: https://github.com/chronotope/chrono/issues/1768
 
 #[cfg(all(feature = "chrono-04", feature = "jiff-02"))]
+#[doc(hidden)]
 pub mod chrono04_jiff02;
 
 /// The error type returned by the fallible conversions in this crate.
