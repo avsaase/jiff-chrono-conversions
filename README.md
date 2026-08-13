@@ -56,14 +56,15 @@ See the examples folder in the repository for more examples of available convers
 Support for each major version of `chrono` and `jiff` is gated behind its own Cargo feature.
 Currently these are the supported versions:
 
-| Feature    | Crate     | Version |
-|------------|-----------|---------|
-| `chrono04` | `chrono`  | `0.4`   |
-| `jiff02`   | `jiff`    | `0.2`   |
+| Feature         | Crate       | Version  |
+|-----------------|-------------|----------|
+| `chrono-04`     | `chrono`    | `0.4`    |
+| `chrono-tz-010` | `chrono-tz` | `0.10.4` |
+| `jiff-02`       | `jiff`      | `0.2`    |
 
 Enabling the features for a given version of `chrono` and `jiff` will enable the conversions
-between those versions. Currently only the `chrono04` and `jiff02` features are available and
-they are enabled by default.
+between those versions. Currently only the `chrono-04` and `jiff-02` features are enabled by
+default; `chrono-tz-010` adds conversions for `chrono_tz::Tz` and must be enabled separately.
 
 Once `jiff` reaches `1.0` support for this version can be added to this crate.
 
