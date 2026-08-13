@@ -26,3 +26,6 @@ jobs:
 
       - name: Test
         run: cargo test --workspace --all-features
+
+      - name: Cargo reedme check
+        run: cargo reedme --check
