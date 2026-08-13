@@ -26,7 +26,7 @@
 //! let chrono_date = jiff_date.to_chrono();
 //! assert_eq!(chrono_date, chrono::NaiveDate::from_ymd_opt(2024, 3, 15).unwrap());
 //!
-//! let jiff_date: jiff::civil::Date = chrono_date.to_jiff().unwrap();
+//! let jiff_date: jiff::civil::Date = chrono_date.try_to_jiff().unwrap();
 //! assert_eq!(jiff_date, jiff::civil::date(2024, 3, 15));
 //! ```
 //!
@@ -89,7 +89,7 @@ pub trait TryToJiff<J> {
     /// This conversion is fallible,. If the converion fails, an error of type `Self::Error` will
     /// be returned. The reasons why the conversion can fail is document on the implementation of
     /// this trait for the specific `chrono` type.
-    fn to_jiff(&self) -> Result<J, Self::Error>;
+    fn try_to_jiff(&self) -> Result<J, Self::Error>;
 }
 
 /// Fallible conversions from `jiff` types to `chrono` types.
@@ -100,7 +100,7 @@ pub trait TryToChrono<C> {
     /// Convert this `jiff` type to the corresponding `chrono` type.
     ///
     /// This conversion is fallible. If the conversion fails, an error of type `Self::Error` will
-    /// be returned. The reasons why the conversion can fail is document on the implementation of
+    /// be returned. The reasons why the conversion can fail is documented on the implementation of
     /// this trait for the specific `jiff` type.
-    fn to_chrono(&self) -> Result<C, Self::Error>;
+    fn try_to_chrono(&self) -> Result<C, Self::Error>;
 }
