@@ -8,33 +8,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: nightly
-
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: stable
           components: rustfmt, clippy
-
       - uses: Swatinem/rust-cache@v2
-
-      - name: Check formatting
-        run: cargo fmt --all -- --check
-
       - uses: taiki-e/install-action@v2
         with:
           tool: cargo-reedme
-
-      - name: Check
-        run: cargo check --workspace --all-features
-
-      - name: Clippy
-        run: cargo clippy --workspace --all-features -- -D warnings
-
-      - name: Test
-        run: cargo test --workspace --all-features
-
-      - name: Cargo reedme check
-        run: cargo reedme --check
+      - run: cargo fmt --all -- --check
+      - run: cargo check --workspace --all-features
+      - run: cargo clippy --workspace --all-features -- -D warnings
+      - run: cargo test --workspace --all-features
+      - run: cargo reedme --check
