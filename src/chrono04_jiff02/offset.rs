@@ -1,9 +1,7 @@
 use chrono_04 as chrono;
 use jiff_02 as jiff;
 
-use crate::{ToJiff, TryToChrono};
-
-use super::OutOfRangeError;
+use crate::{Error, ToJiff, TryToChrono};
 
 /// Convert a `chrono::FixedOffset` to a `jiff::tz::Offset`.
 ///
@@ -20,9 +18,12 @@ impl ToJiff<jiff::tz::Offset> for chrono::FixedOffset {
 /// This conversion is fallible because `jiff`'s offset range (±25:59:59) is larger than
 /// `chrono`'s offset range (±23:59:59).
 impl TryToChrono<chrono::FixedOffset> for jiff::tz::Offset {
-    type Error = OutOfRangeError;
-
-    fn try_to_chrono(&self) -> Result<chrono::FixedOffset, Self::Error> {
-        chrono::FixedOffset::east_opt(self.seconds()).ok_or(OutOfRangeError)
+    fn try_to_chrono(&self) -> Result<chrono::FixedOffset, Error> {
+        chrono::FixedOffset::east_opt(self.seconds()).ok_or_else(|| {
+            Error::new(format!(
+                "offset of {} seconds is out of range for chrono's FixedOffset",
+                self.seconds()
+            ))
+        })
     }
 }

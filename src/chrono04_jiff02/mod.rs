@@ -1,4 +1,7 @@
 use chrono_tz_04 as chrono_tz;
+use jiff_02 as jiff;
+
+use crate::Error;
 
 mod date;
 mod datetime;
@@ -8,21 +11,14 @@ mod timestamp;
 mod timezone;
 mod zoned;
 
-#[derive(Debug)]
-pub struct ToChronoError;
+impl From<jiff::Error> for Error {
+    fn from(err: jiff::Error) -> Self {
+        Error::with_source("failed to convert to jiff type", err)
+    }
+}
 
-#[derive(Debug, thiserror::Error)]
-#[error("Value out of range for target type")]
-pub struct OutOfRangeError;
-
-#[derive(Debug, thiserror::Error)]
-#[error("Time zone is not UTC")]
-pub struct NotUtcError;
-
-/// Error type for time zone conversion from `jiff::tz::TimeZone` to `chrono_tz::Tz`.
-#[derive(Debug, thiserror::Error)]
-#[error("Failed to convert time zone")]
-pub enum TimeZoneConversionError {
-    NoIanaName,
-    TimeZoneParse(chrono_tz::ParseError),
+impl From<chrono_tz::ParseError> for Error {
+    fn from(err: chrono_tz::ParseError) -> Self {
+        Error::with_source("failed to convert time zone", err)
+    }
 }

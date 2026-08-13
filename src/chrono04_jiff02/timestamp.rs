@@ -1,7 +1,7 @@
 use chrono_04 as chrono;
 use jiff_02 as jiff;
 
-use crate::{ToChrono, TryToJiff};
+use crate::{Error, ToChrono, TryToJiff};
 
 /// Convert a `chrono::DateTime<chrono::Utc>` to a `jiff::Timestamp`.
 ///
@@ -10,13 +10,11 @@ use crate::{ToChrono, TryToJiff};
 /// `jiff::Timestamp` does not support leap seconds, so if the `chrono::DateTime` is a leap
 /// second, it is converted to the last nanosecond of the second before it.
 impl TryToJiff<jiff::Timestamp> for chrono::DateTime<chrono::Utc> {
-    type Error = jiff::Error;
-
-    fn try_to_jiff(&self) -> Result<jiff::Timestamp, Self::Error> {
-        jiff::Timestamp::new(
+    fn try_to_jiff(&self) -> Result<jiff::Timestamp, Error> {
+        Ok(jiff::Timestamp::new(
             self.timestamp(),
             self.timestamp_subsec_nanos().min(999_999_999) as i32,
-        )
+        )?)
     }
 }
 

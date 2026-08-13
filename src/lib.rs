@@ -63,6 +63,38 @@
 #[cfg(all(feature = "chrono04", feature = "jiff02"))]
 pub mod chrono04_jiff02;
 
+/// The error type returned by the fallible conversions in this crate.
+///
+/// This type is deliberately opaque: it carries only a human-readable message (available via its
+/// `Display` implementation) and, where applicable, an underlying cause (available via
+/// [`std::error::Error::source`]).
+#[derive(Debug, thiserror::Error)]
+#[error("{message}")]
+pub struct Error {
+    message: String,
+    #[source]
+    source: Option<Box<dyn std::error::Error + Send + Sync + 'static>>,
+}
+
+impl Error {
+    pub(crate) fn new(message: impl Into<String>) -> Self {
+        Self {
+            message: message.into(),
+            source: None,
+        }
+    }
+
+    pub(crate) fn with_source(
+        message: impl Into<String>,
+        source: impl std::error::Error + Send + Sync + 'static,
+    ) -> Self {
+        Self {
+            message: message.into(),
+            source: Some(Box::new(source)),
+        }
+    }
+}
+
 /// Infallible conversions from `chrono` types to `jiff` types.
 pub trait ToJiff<J> {
     /// Convert this `chrono` type to the corresponding `jiff` type.
@@ -81,26 +113,20 @@ pub trait ToChrono<C> {
 
 /// Fallible conversions from `chrono` types to `jiff` types.
 pub trait TryToJiff<J> {
-    /// The error type for this conversion.
-    type Error;
-
     /// Convert this `chrono` type to the corresponding `jiff` type.
     ///
-    /// This conversion is fallible,. If the converion fails, an error of type `Self::Error` will
-    /// be returned. The reasons why the conversion can fail is document on the implementation of
-    /// this trait for the specific `chrono` type.
-    fn try_to_jiff(&self) -> Result<J, Self::Error>;
+    /// This conversion is fallible. If the conversion fails, an [`Error`] is returned. The
+    /// reasons why the conversion can fail is documented on the implementation of this trait for
+    /// the specific `chrono` type.
+    fn try_to_jiff(&self) -> Result<J, Error>;
 }
 
 /// Fallible conversions from `jiff` types to `chrono` types.
 pub trait TryToChrono<C> {
-    /// The error type for this conversion.
-    type Error;
-
     /// Convert this `jiff` type to the corresponding `chrono` type.
     ///
-    /// This conversion is fallible. If the conversion fails, an error of type `Self::Error` will
-    /// be returned. The reasons why the conversion can fail is documented on the implementation of
-    /// this trait for the specific `jiff` type.
-    fn try_to_chrono(&self) -> Result<C, Self::Error>;
+    /// This conversion is fallible. If the conversion fails, an [`Error`] is returned. The
+    /// reasons why the conversion can fail is documented on the implementation of this trait for
+    /// the specific `jiff` type.
+    fn try_to_chrono(&self) -> Result<C, Error>;
 }

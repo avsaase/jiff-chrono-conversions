@@ -12,7 +12,9 @@ categories = ["date-and-time"]
 chrono_04 = { package = "chrono", version = "0.4", default-features = false, features = [
   "std"
 ], optional = true }
-chrono_tz_04 = { package = "chrono-tz", version = "0.10.4", default-features = false, optional = true }
+chrono_tz_04 = { package = "chrono-tz", version = "0.10.4", default-features = false, features = [
+  "std",
+], optional = true }
 jiff_02 = { package = "jiff", version = "0.2", optional = true }
 thiserror = "2.0.20"
 

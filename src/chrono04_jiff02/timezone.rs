@@ -2,9 +2,7 @@ use chrono_04 as chrono;
 use chrono_tz_04 as chrono_tz;
 use jiff_02 as jiff;
 
-use crate::{ToJiff, TryToChrono, TryToJiff};
-
-use super::{NotUtcError, OutOfRangeError, TimeZoneConversionError};
+use crate::{Error, ToJiff, TryToChrono, TryToJiff};
 
 /// Convert a `jiff::tz::TimeZone` to a `chrono_tz::Tz`.
 ///
@@ -12,13 +10,11 @@ use super::{NotUtcError, OutOfRangeError, TimeZoneConversionError};
 /// (e.g. fixed-offset and POSIX time zones), and because `chrono-tz`'s database of IANA names
 /// may not exactly match `jiff`'s.
 impl TryToChrono<chrono_tz::Tz> for jiff::tz::TimeZone {
-    type Error = TimeZoneConversionError;
-
-    fn try_to_chrono(&self) -> Result<chrono_tz::Tz, Self::Error> {
-        self.iana_name()
-            .ok_or(TimeZoneConversionError::NoIanaName)?
-            .parse::<chrono_tz::Tz>()
-            .map_err(|e| TimeZoneConversionError::TimeZoneParse(e))
+    fn try_to_chrono(&self) -> Result<chrono_tz::Tz, Error> {
+        let name = self
+            .iana_name()
+            .ok_or_else(|| Error::new("time zone has no IANA name"))?;
+        Ok(name.parse::<chrono_tz::Tz>()?)
     }
 }
 
@@ -27,10 +23,8 @@ impl TryToChrono<chrono_tz::Tz> for jiff::tz::TimeZone {
 /// This conversion is fallible because `jiff`'s time zone database may not exactly match
 /// `chrono-tz`'s.
 impl TryToJiff<jiff::tz::TimeZone> for chrono_tz::Tz {
-    type Error = jiff::Error;
-
-    fn try_to_jiff(&self) -> Result<jiff::tz::TimeZone, Self::Error> {
-        jiff::tz::TimeZone::get(self.name())
+    fn try_to_jiff(&self) -> Result<jiff::tz::TimeZone, Error> {
+        Ok(jiff::tz::TimeZone::get(self.name())?)
     }
 }
 
@@ -39,10 +33,10 @@ impl TryToJiff<jiff::tz::TimeZone> for chrono_tz::Tz {
 /// This conversion is fallible because the `jiff::tz::TimeZone` might not represent a fixed offset
 /// from UTC.
 impl TryToChrono<chrono::FixedOffset> for jiff::tz::TimeZone {
-    type Error = OutOfRangeError;
-
-    fn try_to_chrono(&self) -> Result<chrono::FixedOffset, Self::Error> {
-        let offset = self.to_fixed_offset().map_err(|_| OutOfRangeError)?;
+    fn try_to_chrono(&self) -> Result<chrono::FixedOffset, Error> {
+        let offset = self
+            .to_fixed_offset()
+            .map_err(|_| Error::new("time zone is not a fixed offset"))?;
         offset.try_to_chrono()
     }
 }
@@ -64,12 +58,10 @@ impl ToJiff<jiff::tz::TimeZone> for chrono::FixedOffset {
 /// This conversion is fallible because a `jiff::tz::TimeZone` might not represent UTC (e.g. it
 /// could be a different fixed offset, or a non-fixed IANA time zone).
 impl TryToChrono<chrono::Utc> for jiff::tz::TimeZone {
-    type Error = NotUtcError;
-
-    fn try_to_chrono(&self) -> Result<chrono::Utc, Self::Error> {
+    fn try_to_chrono(&self) -> Result<chrono::Utc, Error> {
         match self.to_fixed_offset() {
             Ok(offset) if offset == jiff::tz::Offset::UTC => Ok(chrono::Utc),
-            _ => Err(NotUtcError),
+            _ => Err(Error::new("time zone is not UTC")),
         }
     }
 }
