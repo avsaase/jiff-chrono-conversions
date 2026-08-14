@@ -6,7 +6,7 @@ description = "Conversions between jiff and chrono types"
 documentation = "https://docs.rs/jiff-chrono-conversions"
 repository = "https://github.com/avsaase/jiff-chrono-conversions"
 license = "MIT"
-keywords = ["jiff", "chrono", "conversion"]
+keywords = ["chrono", "conversion", "jiff"]
 categories = ["date-and-time"]
 
 # The property-based test suite lives in its own unpublished workspace member (`testsuite/`)

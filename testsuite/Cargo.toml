@@ -5,7 +5,11 @@ edition = "2024"
 publish = false
 
 [dependencies]
-jiff-chrono-conversions = { path = "..", features = ["chrono-04", "chrono-tz-010", "jiff-02"] }
+jiff-chrono-conversions = { path = "..", features = [
+  "chrono-04",
+  "chrono-tz-010",
+  "jiff-02"
+] }
 
 [dev-dependencies]
 arbitrary = "1.4"
