@@ -3,13 +3,13 @@ use jiff_02 as jiff;
 
 use crate::{Error, ToChrono, TryToJiff};
 
-/// Convert a `chrono::DateTime<chrono::Utc>` to a `jiff::Timestamp`.
-///
-/// This conversion is fallible because `chrono`'s `DateTime` range is larger than `jiff`'s
-/// `Timestamp` range. It is infallible with respect to leap seconds: like `jiff::civil::Time`,
-/// `jiff::Timestamp` does not support leap seconds, so if the `chrono::DateTime` is a leap
-/// second, it is converted to the last nanosecond of the second before it.
 impl TryToJiff<jiff::Timestamp> for chrono::DateTime<chrono::Utc> {
+    /// Convert a `chrono::DateTime<chrono::Utc>` to a `jiff::Timestamp`.
+    ///
+    /// This conversion is fallible because `chrono`'s `DateTime` range is larger than `jiff`'s
+    /// `Timestamp` range. It is infallible with respect to leap seconds: like `jiff::civil::Time`,
+    /// `jiff::Timestamp` does not support leap seconds, so if the `chrono::DateTime` is a leap
+    /// second, it is converted to the last nanosecond of the second before it.
     fn try_to_jiff(&self) -> Result<jiff::Timestamp, Error> {
         Ok(jiff::Timestamp::new(
             self.timestamp(),
@@ -18,11 +18,11 @@ impl TryToJiff<jiff::Timestamp> for chrono::DateTime<chrono::Utc> {
     }
 }
 
-/// Convert a `jiff::Timestamp` to a `chrono::DateTime<chrono::Utc>`.
-///
-/// This conversion is infallible because `jiff`'s `Timestamp` range is a subset of `chrono`'s
-/// `DateTime` range.
 impl ToChrono<chrono::DateTime<chrono::Utc>> for jiff::Timestamp {
+    /// Convert a `jiff::Timestamp` to a `chrono::DateTime<chrono::Utc>`.
+    ///
+    /// This conversion is infallible because `jiff`'s `Timestamp` range is a subset of `chrono`'s
+    /// `DateTime` range.
     fn to_chrono(&self) -> chrono::DateTime<chrono::Utc> {
         // `jiff`'s `second` and `subsec_nanosecond` share the same sign (both negative for
         // timestamps before the Unix epoch), whereas `chrono::DateTime::from_timestamp` expects

@@ -3,13 +3,13 @@ use jiff_02 as jiff;
 
 use crate::{ToChrono, ToJiff};
 
-/// Convert a `chrono::NaiveTime` to a `jiff::civil::Time`.
-///
-/// This conversion is infallible with one caveat: `jiff` does not support leap seconds, so if the
-/// `chrono::NaiveTime` is a leap second, it will be converted to the last second of the minute.
-/// When parsing times, `jiff` will accept leap seconds, but they will be normalized to the last
-/// second of the minute so we do the same here.
 impl ToJiff<jiff::civil::Time> for chrono::NaiveTime {
+    /// Convert a `chrono::NaiveTime` to a `jiff::civil::Time`.
+    ///
+    /// This conversion is infallible with one caveat: `jiff` does not support leap seconds, so if
+    /// the `chrono::NaiveTime` is a leap second, it will be converted to the last second of the
+    /// minute. When parsing times, `jiff` will accept leap seconds, but they will be normalized to
+    /// the last second of the minute so we do the same here.
     fn to_jiff(&self) -> jiff::civil::Time {
         // The casts here are safe because
         // - `chrono`'s hour is a u32 in the range [0, 23], which fits in an i8.
@@ -27,12 +27,12 @@ impl ToJiff<jiff::civil::Time> for chrono::NaiveTime {
     }
 }
 
-/// Convert a `jiff::civil::Time` to a `chrono::NaiveTime`.
-///
-/// This conversion is infallible because `jiff`'s time range (including its nanosecond
-/// precision) is a subset of `chrono`'s time range, and `jiff` has no leap seconds to worry
-/// about.
 impl ToChrono<chrono::NaiveTime> for jiff::civil::Time {
+    /// Convert a `jiff::civil::Time` to a `chrono::NaiveTime`.
+    ///
+    /// This conversion is infallible because `jiff`'s time range (including its nanosecond
+    /// precision) is a subset of `chrono`'s time range, and `jiff` has no leap seconds to worry
+    /// about.
     fn to_chrono(&self) -> chrono::NaiveTime {
         chrono::NaiveTime::from_hms_nano_opt(
             self.hour() as u32,

@@ -3,10 +3,10 @@ use jiff_02 as jiff;
 
 use crate::{Error, ToChrono, TryToJiff};
 
-/// Convert a `chrono::NaiveDate` to a `jiff::civil::Date`.
-///
-/// This conversion is fallible because `chrono`'s date range is larger than `jiff`'s date range.
 impl TryToJiff<jiff::civil::Date> for chrono::NaiveDate {
+    /// Convert a `chrono::NaiveDate` to a `jiff::civil::Date`.
+    ///
+    /// This conversion is fallible because `chrono`'s date range is larger than `jiff`'s date range.
     fn try_to_jiff(&self) -> Result<jiff::civil::Date, Error> {
         let year: i16 = self.year().try_into().map_err(|_| {
             Error::new(format!(
@@ -25,10 +25,11 @@ impl TryToJiff<jiff::civil::Date> for chrono::NaiveDate {
     }
 }
 
-/// Convert a `jiff::civil::Date` to a `chrono::NaiveDate`.
-///
-/// This conversion is infallible because `jiff`'s date range is a subset of `chrono`'s date range.
 impl ToChrono<chrono::NaiveDate> for jiff::civil::Date {
+    /// Convert a `jiff::civil::Date` to a `chrono::NaiveDate`.
+    ///
+    /// This conversion is infallible because `jiff`'s date range is a subset of `chrono`'s date
+    /// range.
     fn to_chrono(&self) -> chrono::NaiveDate {
         // The casts here as safe because
         // - `jiff`'s year is an i16 in the range [-9999, 9999], which fits in an i32.
