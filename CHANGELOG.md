@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Move trait impl doc comments from impl blocks to methods so rust-analyzer shows them.
 
-# [0.1.0] - 2026-08-13
+## [0.1.0] - 2026-08-13
 
 First release ready for general use.
 
