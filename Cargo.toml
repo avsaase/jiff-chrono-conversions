@@ -9,11 +9,8 @@ license = "MIT"
 keywords = ["chrono", "conversion", "jiff"]
 categories = ["date-and-time"]
 
-# The property-based test suite lives in its own unpublished workspace member (`testsuite/`)
-# rather than in this crate's `[dev-dependencies]`, because it needs `jiff`'s `arbitrary` feature,
-# which isn't in a released version yet and would otherwise make this crate unpublishable.
 [workspace]
-members = ["examples/basic", "testsuite"]
+members = ["examples/basic"]
 
 [dependencies]
 chrono_04 = { package = "chrono", version = "0.4", default-features = false, features = [
@@ -23,18 +20,38 @@ chrono_tz_010 = { package = "chrono-tz", version = "0.10.4", default-features = 
   "std",
 ], optional = true }
 jiff_02 = { package = "jiff", version = "0.2", optional = true }
+jiff_10 = { package = "jiff", version = "1", optional = true }
 thiserror = "2.0.20"
 
 [features]
-default = ["chrono-04", "jiff-02"]
+default = ["chrono-04", "jiff-10"]
 chrono-04 = ["dep:chrono_04"]
 chrono-tz-010 = ["dep:chrono_tz_010"]
 jiff-02 = ["dep:jiff_02"]
+jiff-10 = ["dep:jiff_10"]
 
-# Keeps `jiff` as the same package across both workspace members (rather than two separate copies
-# from two different sources), so the testsuite crate's `jiff` types are the same types this
-# crate's trait impls are written for. Only affects local builds within this workspace: `[patch]`
-# is dropped when this crate is published or used as a dependency elsewhere, and `cargo publish`
-# only resolves the package actually being published, so this doesn't affect publishability.
-[patch.crates-io]
-jiff = { git = "https://github.com/BurntSushi/jiff" }
+[dev-dependencies]
+arbitrary = "1.4"
+chrono_04 = { package = "chrono", version = "0.4", default-features = false, features = [
+  "arbitrary",
+  "std",
+] }
+chrono_tz_010 = { package = "chrono-tz", version = "0.10.4", default-features = false }
+jiff_02 = { package = "jiff", version = "0.2", features = [
+  "arbitrary",
+] }
+jiff_10 = { package = "jiff", version = "1", features = [
+  "arbitrary",
+] }
+proptest = "1.5"
+proptest-arbitrary-interop = "0.1"
+
+# Manually declared (rather than auto-discovered) so each suite only compiles when the crate
+# features it tests are enabled.
+[[test]]
+name = "chrono04_jiff02_proptest"
+required-features = ["chrono-04", "jiff-02"]
+
+[[test]]
+name = "chrono04_jiff10_proptest"
+required-features = ["chrono-04", "jiff-10"]

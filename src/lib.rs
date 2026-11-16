@@ -19,7 +19,7 @@
 //!
 //! ```
 //! # use chrono_04 as chrono;
-//! # use jiff_02 as jiff;
+//! # use jiff_10 as jiff;
 //! use jiff_chrono_conversions::{ToChrono, TryToJiff};
 //!
 //! let jiff_date = jiff::civil::date(2024, 3, 15);
@@ -42,12 +42,13 @@
 //! | `chrono-04`     | `chrono`    | `0.4`    |
 //! | `chrono-tz-010` | `chrono-tz` | `0.10.4` |
 //! | `jiff-02`       | `jiff`      | `0.2`    |
+//! | `jiff-10`       | `jiff`      | `1.0`    |
 //!
 //! Enabling the features for a given version of `chrono` and `jiff` will enable the conversions
-//! between those versions. Currently only the `chrono-04` and `jiff-02` features are enabled by
-//! default; `chrono-tz-010` adds conversions for `chrono_tz::Tz` and must be enabled separately.
-//!
-//! Once `jiff` reaches `1.0` support for this version can be added to this crate.
+//! between those versions. `jiff 1.0` is now the default: the `chrono-04` and `jiff-10` features
+//! are enabled by default, while `chrono-tz-010` adds conversions for `chrono_tz::Tz` and must be
+//! enabled separately. The `jiff-02` feature can be enabled alongside `jiff-10` for codebases
+//! that are migrating.
 //!
 //! # Error handling
 //!
@@ -73,6 +74,10 @@
 #[cfg(all(feature = "chrono-04", feature = "jiff-02"))]
 #[doc(hidden)]
 pub mod chrono04_jiff02;
+
+#[cfg(all(feature = "chrono-04", feature = "jiff-10"))]
+#[doc(hidden)]
+pub mod chrono04_jiff10;
 
 /// The error type returned by the fallible conversions in this crate.
 ///
@@ -103,6 +108,17 @@ impl Error {
             message: message.into(),
             source: Some(Box::new(source)),
         }
+    }
+}
+
+// This conversion doesn't depend on the `jiff` version, so unlike the `From<jiff::Error>` impls it
+// lives here instead of in the version-specific modules. That way it isn't duplicated once for
+// each enabled `jiff` version, which would produce conflicting implementations when more than one
+// `jiff-*` feature is enabled.
+#[cfg(feature = "chrono-tz-010")]
+impl From<chrono_tz_010::ParseError> for Error {
+    fn from(err: chrono_tz_010::ParseError) -> Self {
+        Error::with_source("failed to convert time zone", err)
     }
 }
 

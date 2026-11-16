@@ -1,4 +1,5 @@
 use chrono_04 as chrono;
+#[cfg(feature = "chrono-tz-010")]
 use chrono_tz_010 as chrono_tz;
 use jiff_02 as jiff;
 use jiff_chrono_conversions::{ToChrono, ToJiff, TryToChrono, TryToJiff};
@@ -12,19 +13,23 @@ use chrono::{Datelike, Timelike};
 proptest! {
     #[test]
     fn date_roundtrip_chrono_to_jiff_to_chrono(date in chrono_date_in_jiff_range()) {
-        let jiff_date = date.try_to_jiff().expect("date is within jiff's range");
+        let jiff_date =
+            TryToJiff::<jiff::civil::Date>::try_to_jiff(&date).expect("date is within jiff's range");
         prop_assert_eq!(jiff_date.to_chrono(), date);
     }
 
     #[test]
     fn date_roundtrip_jiff_to_chrono_to_jiff(date in arb::<jiff::civil::Date>()) {
         let chrono_date = date.to_chrono();
-        prop_assert_eq!(chrono_date.try_to_jiff().expect("date came from jiff's range"), date);
+        let roundtripped = TryToJiff::<jiff::civil::Date>::try_to_jiff(&chrono_date)
+            .expect("date came from jiff's range");
+        prop_assert_eq!(roundtripped, date);
     }
 
     #[test]
     fn date_chrono_to_jiff_matches_components(date in chrono_date_in_jiff_range()) {
-        let jiff_date = date.try_to_jiff().expect("date is within jiff's range");
+        let jiff_date =
+            TryToJiff::<jiff::civil::Date>::try_to_jiff(&date).expect("date is within jiff's range");
         prop_assert_eq!(jiff_date.year() as i32, date.year());
         prop_assert_eq!(jiff_date.month() as u32, date.month());
         prop_assert_eq!(jiff_date.day() as u32, date.day());
@@ -40,7 +45,8 @@ proptest! {
 
     #[test]
     fn date_outside_jiff_range_fails_to_convert(date in chrono_date_outside_jiff_range()) {
-        prop_assert!(date.try_to_jiff().is_err());
+        let result = TryToJiff::<jiff::civil::Date>::try_to_jiff(&date);
+        prop_assert!(result.is_err());
     }
 }
 
@@ -51,19 +57,21 @@ proptest! {
     fn time_roundtrip_chrono_to_jiff_to_chrono(
         time in arb::<chrono::NaiveTime>().prop_filter("not a leap second", |t| t.nanosecond() < 1_000_000_000)
     ) {
-        prop_assert_eq!(time.to_jiff().to_chrono(), time);
+        let jiff_time = ToJiff::<jiff::civil::Time>::to_jiff(&time);
+        prop_assert_eq!(jiff_time.to_chrono(), time);
     }
 
     #[test]
     fn time_roundtrip_jiff_to_chrono_to_jiff(time in arb::<jiff::civil::Time>()) {
-        prop_assert_eq!(time.to_chrono().to_jiff(), time);
+        let roundtripped = ToJiff::<jiff::civil::Time>::to_jiff(&time.to_chrono());
+        prop_assert_eq!(roundtripped, time);
     }
 
     #[test]
     fn time_chrono_to_jiff_matches_components(
         time in arb::<chrono::NaiveTime>().prop_filter("not a leap second", |t| t.nanosecond() < 1_000_000_000)
     ) {
-        let jiff_time = time.to_jiff();
+        let jiff_time = ToJiff::<jiff::civil::Time>::to_jiff(&time);
         prop_assert_eq!(jiff_time.hour() as u32, time.hour());
         prop_assert_eq!(jiff_time.minute() as u32, time.minute());
         prop_assert_eq!(jiff_time.second() as u32, time.second());
@@ -83,7 +91,7 @@ proptest! {
     fn time_leap_second_normalizes_to_last_second_of_minute(
         time in arb::<chrono::NaiveTime>().prop_filter("leap second", |t| t.nanosecond() >= 1_000_000_000)
     ) {
-        let jiff_time = time.to_jiff();
+        let jiff_time = ToJiff::<jiff::civil::Time>::to_jiff(&time);
         prop_assert_eq!(jiff_time.hour(), time.hour() as i8);
         prop_assert_eq!(jiff_time.minute(), time.minute() as i8);
         prop_assert_eq!(jiff_time.second(), 59);
@@ -100,17 +108,17 @@ proptest! {
         time in arb::<chrono::NaiveTime>().prop_filter("not a leap second", |t| t.nanosecond() < 1_000_000_000),
     ) {
         let datetime = chrono::NaiveDateTime::new(date, time);
-        let jiff_datetime = datetime.try_to_jiff().expect("datetime is within jiff's range");
+        let jiff_datetime = TryToJiff::<jiff::civil::DateTime>::try_to_jiff(&datetime)
+            .expect("datetime is within jiff's range");
         prop_assert_eq!(jiff_datetime.to_chrono(), datetime);
     }
 
     #[test]
     fn datetime_roundtrip_jiff_to_chrono_to_jiff(datetime in arb::<jiff::civil::DateTime>()) {
         let chrono_datetime = datetime.to_chrono();
-        prop_assert_eq!(
-            chrono_datetime.try_to_jiff().expect("datetime came from jiff's range"),
-            datetime
-        );
+        let roundtripped = TryToJiff::<jiff::civil::DateTime>::try_to_jiff(&chrono_datetime)
+            .expect("datetime came from jiff's range");
+        prop_assert_eq!(roundtripped, datetime);
     }
 
     #[test]
@@ -119,7 +127,8 @@ proptest! {
         time in arb::<chrono::NaiveTime>(),
     ) {
         let datetime = chrono::NaiveDateTime::new(date, time);
-        prop_assert!(datetime.try_to_jiff().is_err());
+        let result = TryToJiff::<jiff::civil::DateTime>::try_to_jiff(&datetime);
+        prop_assert!(result.is_err());
     }
 
     #[test]
@@ -128,7 +137,8 @@ proptest! {
         time in arb::<chrono::NaiveTime>().prop_filter("not a leap second", |t| t.nanosecond() < 1_000_000_000),
     ) {
         let datetime = chrono::NaiveDateTime::new(date, time);
-        let jiff_datetime = datetime.try_to_jiff().expect("datetime is within jiff's range");
+        let jiff_datetime = TryToJiff::<jiff::civil::DateTime>::try_to_jiff(&datetime)
+            .expect("datetime is within jiff's range");
         prop_assert_eq!(jiff_datetime.date().year() as i32, date.year());
         prop_assert_eq!(jiff_datetime.date().month() as u32, date.month());
         prop_assert_eq!(jiff_datetime.date().day() as u32, date.day());
@@ -159,22 +169,22 @@ proptest! {
 proptest! {
     #[test]
     fn timestamp_roundtrip_chrono_to_jiff_to_chrono(chrono_dt in chrono_utc_datetime_in_jiff_range()) {
-        let jiff_ts: jiff::Timestamp =
-            chrono_dt.try_to_jiff().expect("timestamp is within jiff's range");
+        let jiff_ts = TryToJiff::<jiff::Timestamp>::try_to_jiff(&chrono_dt)
+            .expect("timestamp is within jiff's range");
         prop_assert_eq!(jiff_ts.to_chrono(), chrono_dt);
     }
 
     #[test]
     fn timestamp_roundtrip_jiff_to_chrono_to_jiff(jiff_ts in arb::<jiff::Timestamp>()) {
         let chrono_dt = jiff_ts.to_chrono();
-        let roundtripped: jiff::Timestamp =
-            chrono_dt.try_to_jiff().expect("timestamp came from jiff's range");
+        let roundtripped = TryToJiff::<jiff::Timestamp>::try_to_jiff(&chrono_dt)
+            .expect("timestamp came from jiff's range");
         prop_assert_eq!(roundtripped, jiff_ts);
     }
 
     #[test]
     fn timestamp_outside_jiff_range_fails_to_convert(chrono_dt in chrono_utc_datetime_outside_jiff_range()) {
-        let result: Result<jiff::Timestamp, _> = chrono_dt.try_to_jiff();
+        let result = TryToJiff::<jiff::Timestamp>::try_to_jiff(&chrono_dt);
         prop_assert!(result.is_err());
     }
 
@@ -182,8 +192,8 @@ proptest! {
     fn timestamp_leap_second_normalizes_to_last_nanosecond_of_second(
         chrono_dt in chrono_utc_datetime_leap_second_in_jiff_range()
     ) {
-        let jiff_ts: jiff::Timestamp =
-            chrono_dt.try_to_jiff().expect("timestamp is within jiff's range");
+        let jiff_ts = TryToJiff::<jiff::Timestamp>::try_to_jiff(&chrono_dt)
+            .expect("timestamp is within jiff's range");
         // `jiff::Timestamp::new` keeps the sign of its `second` and `nanosecond` components
         // aligned, so for pre-epoch leap seconds the carry ends up split across both fields
         // differently than for post-epoch ones. Compare the total nanosecond instant instead of
@@ -201,8 +211,8 @@ proptest! {
     // instant across the fields the same way, even though they represent the same instant.
     #[test]
     fn timestamp_chrono_to_jiff_matches_components(chrono_dt in chrono_utc_datetime_in_jiff_range()) {
-        let jiff_ts: jiff::Timestamp =
-            chrono_dt.try_to_jiff().expect("timestamp is within jiff's range");
+        let jiff_ts = TryToJiff::<jiff::Timestamp>::try_to_jiff(&chrono_dt)
+            .expect("timestamp is within jiff's range");
         let actual =
             jiff_ts.as_second() as i128 * 1_000_000_000 + jiff_ts.subsec_nanosecond() as i128;
         let expected =
@@ -226,7 +236,7 @@ proptest! {
 proptest! {
     #[test]
     fn offset_roundtrip_chrono_to_jiff_to_chrono(chrono_offset in arb::<chrono::FixedOffset>()) {
-        let jiff_offset: jiff::tz::Offset = chrono_offset.to_jiff();
+        let jiff_offset = ToJiff::<jiff::tz::Offset>::to_jiff(&chrono_offset);
         prop_assert_eq!(
             jiff_offset.try_to_chrono().expect("offset came from chrono's range"),
             chrono_offset
@@ -236,7 +246,7 @@ proptest! {
     #[test]
     fn offset_roundtrip_jiff_to_chrono_to_jiff(jiff_offset in jiff_offset_in_chrono_range()) {
         let chrono_offset = jiff_offset.try_to_chrono().expect("offset is within chrono's range");
-        let roundtripped: jiff::tz::Offset = chrono_offset.to_jiff();
+        let roundtripped = ToJiff::<jiff::tz::Offset>::to_jiff(&chrono_offset);
         prop_assert_eq!(roundtripped, jiff_offset);
     }
 
@@ -247,7 +257,7 @@ proptest! {
 
     #[test]
     fn offset_chrono_to_jiff_matches_components(chrono_offset in arb::<chrono::FixedOffset>()) {
-        let jiff_offset: jiff::tz::Offset = chrono_offset.to_jiff();
+        let jiff_offset = ToJiff::<jiff::tz::Offset>::to_jiff(&chrono_offset);
         prop_assert_eq!(jiff_offset.seconds(), chrono_offset.local_minus_utc());
     }
 
@@ -263,7 +273,8 @@ proptest! {
 proptest! {
     #[test]
     fn zoned_roundtrip_chrono_to_jiff_to_chrono(chrono_dt in chrono_fixedoffset_datetime_in_jiff_range()) {
-        let zoned = chrono_dt.try_to_jiff().expect("value is within jiff's range");
+        let zoned =
+            TryToJiff::<jiff::Zoned>::try_to_jiff(&chrono_dt).expect("value is within jiff's range");
         let back: chrono::DateTime<chrono::FixedOffset> =
             zoned.try_to_chrono().expect("offset is within chrono's range");
         prop_assert_eq!(back, chrono_dt);
@@ -277,7 +288,8 @@ proptest! {
         let zoned = timestamp.to_zoned(jiff::tz::TimeZone::fixed(offset));
         let chrono_dt: chrono::DateTime<chrono::FixedOffset> =
             zoned.try_to_chrono().expect("offset is within chrono's range");
-        let roundtripped = chrono_dt.try_to_jiff().expect("value came from jiff's range");
+        let roundtripped = TryToJiff::<jiff::Zoned>::try_to_jiff(&chrono_dt)
+            .expect("value came from jiff's range");
         prop_assert_eq!(roundtripped.timestamp(), zoned.timestamp());
         prop_assert_eq!(roundtripped.offset(), zoned.offset());
     }
@@ -294,7 +306,8 @@ proptest! {
 
     #[test]
     fn zoned_chrono_to_jiff_matches_components(chrono_dt in chrono_fixedoffset_datetime_in_jiff_range()) {
-        let zoned = chrono_dt.try_to_jiff().expect("value is within jiff's range");
+        let zoned =
+            TryToJiff::<jiff::Zoned>::try_to_jiff(&chrono_dt).expect("value is within jiff's range");
         let utc = chrono_dt.with_timezone(&chrono::Utc);
         let actual = zoned.timestamp().as_second() as i128 * 1_000_000_000
             + zoned.timestamp().subsec_nanosecond() as i128;
@@ -325,7 +338,8 @@ proptest! {
 proptest! {
     #[test]
     fn zoned_utc_roundtrip_chrono_to_jiff_to_chrono(chrono_dt in chrono_utc_datetime_in_jiff_range()) {
-        let zoned: jiff::Zoned = chrono_dt.try_to_jiff().expect("value is within jiff's range");
+        let zoned =
+            TryToJiff::<jiff::Zoned>::try_to_jiff(&chrono_dt).expect("value is within jiff's range");
         let back: chrono::DateTime<chrono::Utc> = zoned.to_chrono();
         prop_assert_eq!(back, chrono_dt);
     }
@@ -334,8 +348,8 @@ proptest! {
     fn zoned_utc_roundtrip_jiff_to_chrono_to_jiff(timestamp in arb::<jiff::Timestamp>()) {
         let zoned = timestamp.to_zoned(jiff::tz::TimeZone::UTC);
         let chrono_dt: chrono::DateTime<chrono::Utc> = zoned.to_chrono();
-        let roundtripped: jiff::Zoned =
-            chrono_dt.try_to_jiff().expect("value came from jiff's range");
+        let roundtripped = TryToJiff::<jiff::Zoned>::try_to_jiff(&chrono_dt)
+            .expect("value came from jiff's range");
         prop_assert_eq!(roundtripped.timestamp(), zoned.timestamp());
         prop_assert_eq!(roundtripped.offset(), zoned.offset());
     }
@@ -344,13 +358,14 @@ proptest! {
     fn zoned_utc_outside_jiff_range_fails_to_convert(
         chrono_dt in chrono_utc_datetime_outside_jiff_range()
     ) {
-        let result: Result<jiff::Zoned, _> = chrono_dt.try_to_jiff();
+        let result = TryToJiff::<jiff::Zoned>::try_to_jiff(&chrono_dt);
         prop_assert!(result.is_err());
     }
 
     #[test]
     fn zoned_utc_chrono_to_jiff_matches_components(chrono_dt in chrono_utc_datetime_in_jiff_range()) {
-        let zoned: jiff::Zoned = chrono_dt.try_to_jiff().expect("value is within jiff's range");
+        let zoned =
+            TryToJiff::<jiff::Zoned>::try_to_jiff(&chrono_dt).expect("value is within jiff's range");
         let actual = zoned.timestamp().as_second() as i128 * 1_000_000_000
             + zoned.timestamp().subsec_nanosecond() as i128;
         let expected =
@@ -373,10 +388,11 @@ proptest! {
 
 /* Time zone */
 
+#[cfg(feature = "chrono-tz-010")]
 proptest! {
     #[test]
     fn timezone_roundtrip_for_shared_iana_names(tz in shared_tz()) {
-        let time_zone = tz.try_to_jiff().expect("name is known to jiff");
+        let time_zone = TryToJiff::<jiff::tz::TimeZone>::try_to_jiff(&tz).expect("name is known to jiff");
         let back: chrono_tz::Tz = time_zone.try_to_chrono().expect("name is known to chrono-tz");
         prop_assert_eq!(back, tz);
     }
@@ -387,7 +403,7 @@ proptest! {
 proptest! {
     #[test]
     fn timezone_fixedoffset_roundtrip_chrono_to_jiff_to_chrono(chrono_offset in arb::<chrono::FixedOffset>()) {
-        let jiff_tz: jiff::tz::TimeZone = chrono_offset.to_jiff();
+        let jiff_tz = ToJiff::<jiff::tz::TimeZone>::to_jiff(&chrono_offset);
         let back: chrono::FixedOffset =
             jiff_tz.try_to_chrono().expect("offset came from chrono's range");
         prop_assert_eq!(back, chrono_offset);
@@ -398,7 +414,7 @@ proptest! {
         let offset = tz.to_fixed_offset().expect("time zone is a fixed offset");
         let chrono_offset: chrono::FixedOffset =
             tz.try_to_chrono().expect("offset is within chrono's range");
-        let roundtripped: jiff::tz::TimeZone = chrono_offset.to_jiff();
+        let roundtripped = ToJiff::<jiff::tz::TimeZone>::to_jiff(&chrono_offset);
         prop_assert_eq!(roundtripped.to_fixed_offset().unwrap(), offset);
     }
 
@@ -421,7 +437,7 @@ proptest! {
 
 #[test]
 fn timezone_utc_roundtrip_chrono_to_jiff_to_chrono() {
-    let jiff_tz: jiff::tz::TimeZone = chrono::Utc.to_jiff();
+    let jiff_tz = ToJiff::<jiff::tz::TimeZone>::to_jiff(&chrono::Utc);
     let result: Result<chrono::Utc, _> = jiff_tz.try_to_chrono();
     assert!(result.is_ok());
 }
@@ -430,7 +446,7 @@ fn timezone_utc_roundtrip_chrono_to_jiff_to_chrono() {
 fn timezone_utc_roundtrip_jiff_to_chrono_to_jiff() {
     let jiff_tz = jiff::tz::TimeZone::UTC;
     let _: chrono::Utc = jiff_tz.try_to_chrono().expect("UTC is UTC");
-    let roundtripped: jiff::tz::TimeZone = chrono::Utc.to_jiff();
+    let roundtripped = ToJiff::<jiff::tz::TimeZone>::to_jiff(&chrono::Utc);
     assert_eq!(
         roundtripped.to_fixed_offset().unwrap(),
         jiff::tz::Offset::UTC
@@ -453,10 +469,12 @@ proptest! {
 
 /* DateTime with IANA time zone */
 
+#[cfg(feature = "chrono-tz-010")]
 proptest! {
     #[test]
     fn zoned_named_roundtrip_chrono_to_jiff_to_chrono(chrono_dt in chrono_tz_datetime_in_jiff_range()) {
-        let zoned = chrono_dt.try_to_jiff().expect("value is within jiff's range and tz is known to jiff");
+        let zoned = TryToJiff::<jiff::Zoned>::try_to_jiff(&chrono_dt)
+            .expect("value is within jiff's range and tz is known to jiff");
         let back: chrono::DateTime<chrono_tz::Tz> =
             zoned.try_to_chrono().expect("tz name is known to chrono-tz");
         prop_assert_eq!(back, chrono_dt);
@@ -471,7 +489,8 @@ proptest! {
         let zoned = timestamp.to_zoned(jiff_tz);
         let chrono_dt: chrono::DateTime<chrono_tz::Tz> =
             zoned.try_to_chrono().expect("tz name is known to chrono-tz");
-        let roundtripped = chrono_dt.try_to_jiff().expect("value came from jiff's range");
+        let roundtripped = TryToJiff::<jiff::Zoned>::try_to_jiff(&chrono_dt)
+            .expect("value came from jiff's range");
         prop_assert_eq!(roundtripped.timestamp(), zoned.timestamp());
         prop_assert_eq!(roundtripped.offset(), zoned.offset());
     }
@@ -480,12 +499,14 @@ proptest! {
     fn zoned_named_outside_jiff_range_fails_to_convert(
         chrono_dt in chrono_tz_datetime_outside_jiff_range()
     ) {
-        prop_assert!(chrono_dt.try_to_jiff().is_err());
+        let result = TryToJiff::<jiff::Zoned>::try_to_jiff(&chrono_dt);
+        prop_assert!(result.is_err());
     }
 
     #[test]
     fn zoned_named_chrono_to_jiff_matches_components(chrono_dt in chrono_tz_datetime_in_jiff_range()) {
-        let zoned = chrono_dt.try_to_jiff().expect("value is within jiff's range and tz is known to jiff");
+        let zoned = TryToJiff::<jiff::Zoned>::try_to_jiff(&chrono_dt)
+            .expect("value is within jiff's range and tz is known to jiff");
         let utc = chrono_dt.with_timezone(&chrono::Utc);
         let actual = zoned.timestamp().as_second() as i128 * 1_000_000_000
             + zoned.timestamp().subsec_nanosecond() as i128;
@@ -645,6 +666,7 @@ fn jiff_named_tz_not_fixed() -> impl Strategy<Value = jiff::tz::TimeZone> {
     })
 }
 
+#[cfg(feature = "chrono-tz-010")]
 fn shared_tz() -> impl Strategy<Value = chrono_tz::Tz> {
     // As in `timezone_roundtrip_for_shared_iana_names` above, only test with names that both
     // `chrono-tz` and `jiff` recognize.
@@ -654,10 +676,12 @@ fn shared_tz() -> impl Strategy<Value = chrono_tz::Tz> {
         })
 }
 
+#[cfg(feature = "chrono-tz-010")]
 fn chrono_tz_datetime_in_jiff_range() -> impl Strategy<Value = chrono::DateTime<chrono_tz::Tz>> {
     (shared_tz(), chrono_utc_datetime_in_jiff_range()).prop_map(|(tz, utc)| utc.with_timezone(&tz))
 }
 
+#[cfg(feature = "chrono-tz-010")]
 fn chrono_tz_datetime_outside_jiff_range() -> impl Strategy<Value = chrono::DateTime<chrono_tz::Tz>>
 {
     (shared_tz(), chrono_utc_datetime_outside_jiff_range())

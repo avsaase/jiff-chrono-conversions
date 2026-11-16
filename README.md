@@ -61,12 +61,13 @@ Currently these are the supported versions:
 | `chrono-04`     | `chrono`    | `0.4`    |
 | `chrono-tz-010` | `chrono-tz` | `0.10.4` |
 | `jiff-02`       | `jiff`      | `0.2`    |
+| `jiff-10`       | `jiff`      | `1.0`    |
 
 Enabling the features for a given version of `chrono` and `jiff` will enable the conversions
-between those versions. Currently only the `chrono-04` and `jiff-02` features are enabled by
-default; `chrono-tz-010` adds conversions for `chrono_tz::Tz` and must be enabled separately.
-
-Once `jiff` reaches `1.0` support for this version can be added to this crate.
+between those versions. `jiff 1.0` is now the default: the `chrono-04` and `jiff-10` features
+are enabled by default, while `chrono-tz-010` adds conversions for `chrono_tz::Tz` and must be
+enabled separately. The `jiff-02` feature can be enabled alongside `jiff-10` for codebases
+that are migrating.
 
 ## Error handling
 

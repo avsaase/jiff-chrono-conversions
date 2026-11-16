@@ -37,11 +37,11 @@ fn main() {
     println!("offset: jiff {jiff_offset} -> chrono {chrono_offset}");
 
     // Zoned DateTime: both directions are fallible.
-    let jiff_zoned = jiff_timestamp.to_zoned(jiff::tz::TimeZone::fixed(jiff_offset));
+    let jiff_zoned = jiff_timestamp.to_zoned_datetime(jiff::tz::TimeZone::fixed(jiff_offset));
     let chrono_fixed_datetime: chrono::DateTime<chrono::FixedOffset> =
         jiff_zoned.try_to_chrono().unwrap();
     println!("zoned datetime: jiff {jiff_zoned} -> chrono {chrono_fixed_datetime}");
-    let jiff_zoned: jiff::Zoned = chrono_fixed_datetime.try_to_jiff().unwrap();
+    let jiff_zoned: jiff::ZonedDateTime = chrono_fixed_datetime.try_to_jiff().unwrap();
     println!("zoned datetime: chrono {chrono_fixed_datetime} -> jiff {jiff_zoned}");
 
     // Time zone: both directions are fallible.
